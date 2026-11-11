@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phosphor Terminal - Welcome John, Sky & Lily</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Retro-Futuristic Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&family=Orbitron:wght@400;600;800;900&family=VT323&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --p-green-bright: #39ff14;
+            --p-green-mid: #00ff66;
+            --p-green-glow: #00cc44;
+            --p-green-dark: #003311;
+            --p-bg-dark: #020b04;
+        }
+
+        body {
+            background-color: var(--p-bg-dark);
+            color: var(--p-green-bright);
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .font-vt323 {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Glowing Text Effects */
+        .glow-text-sm {
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.6), 0 0 10px rgba(57, 255, 20, 0.4);
+        }
+
+        .glow-text-lg {
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.8), 0 0 20px rgba(57, 255, 20, 0.6), 0 0 35px rgba(57, 255, 20, 0.4);
+        }
+
+        .glow-box {
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.25), inset 0 0 15px rgba(57, 255, 20, 0.15);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+        }
+
+        .glow-box-hover:hover {
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.5), inset 0 0 20px rgba(57, 255, 20, 0.25);
+            border-color: rgba(57, 255, 20, 0.8);
+        }
+
+        /* CRT Scanlines Overlay */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.4) 50%,
+                rgba(0, 0, 0, 0.4)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* CRT Screen Curved Vignette Overlay */
+        .crt-overlay {
+            background: radial-gradient(circle, rgba(0,20,5,0) 60%, rgba(2,11,4,0.85) 100%);
+            pointer-events: none;
+        }
+
+        /* Grid Background Pattern */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 255, 102, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 255, 102, 0.05) 1px, transparent 1px);
+        }
+
+        /* Custom Flicker Animation */
+        @keyframes crtFlicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            52% { opacity: 0.92; }
+            54% { opacity: 1; }
+            80% { opacity: 0.96; }
+            100% { opacity: 0.98; }
+        }
+
+        .crt-flicker {
+            animation: crtFlicker 0.15s infinite alternate;
+        }
+
+        /* Floating Animation for User Cards */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float-1 { animation: floatSlow 6s ease-in-out infinite; }
+        .animate-float-2 { animation: floatSlow 7s ease-in-out infinite 1s; }
+        .animate-float-3 { animation: floatSlow 6.5s ease-in-out infinite 2s; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020b04;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #003311;
+            border: 1px solid #39ff14;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between select-none overflow-x-hidden">
+
+    <!-- Interactive Particle Matrix Canvas -->
+    <canvas id="phosphorCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+    
+    <!-- Grid & CRT Effects Overlays -->
+    <div class="fixed inset-0 bg-grid pointer-events-none z-0"></div>
+    <div class="fixed inset-0 scanlines pointer-events-none z-40 opacity-70"></div>
+    <div class="fixed inset-0 crt-overlay pointer-events-none z-40"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="relative z-10 flex flex-col min-h-screen justify-between p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full crt-flicker">
+
+        <!-- Header / Status Bar -->
+        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-green-500/30 pb-4 backdrop-blur-sm">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 rounded-full bg-green-500 animate-ping"></div>
+                <span class="font-orbitron tracking-widest text-sm sm:text-base font-bold glow-text-sm">
+                    PHOSPHOR_OS // v3.8.4
+                </span>
+            </div>
+            
+            <div class="flex items-center space-x-6 text-xs sm:text-sm font-vt323 tracking-wider text-green-400/80">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-signal text-xs"></i>
+                    <span>LINK: ONLINE</span>
+                </div>
+                <div class="hidden sm:block">
+                    <span>SYS_TEMP: 32°C</span>
+                </div>
+                <div id="systemClock" class="glow-text-sm font-semibold text-green-300">
+                    00:00:00 UTC
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="my-auto py-10 flex flex-col items-center text-center">
+            
+            <!-- Terminal Badge -->
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-950/60 border border-green-500/40 text-xs tracking-widest uppercase mb-6 glow-box">
+                <i class="fa-solid fa-terminal text-green-400"></i>
+                <span>Broadcast Signal Established</span>
+            </div>
+
+            <!-- Main Greeting Title -->
+            <h1 class="font-orbitron text-4xl sm:text-6xl md:text-7xl font-black tracking-tight mb-4 text-green-400 glow-text-lg leading-tight">
+                HELLO WORLD
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="max-w-2xl text-green-300/80 text-sm sm:text-base md:text-lg mb-12 font-light tracking-wide leading-relaxed">
+                Welcome to the high-luminance phosphor matrix. Personalized clearance has been granted for the three primary operators:
+            </p>
+
+            <!-- Cards Grid for John, Sky, Lily -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-2">
+                
+                <!-- JOHN CARD -->
+                <div class="animate-float-1 group relative bg-green-950/20 backdrop-blur-md rounded-xl p-6 glow-box glow-box-hover transition-all duration-300 text-left flex flex-col justify-between">
+                    <div class="absolute -top-3 left-6 px-2 bg-black text-[10px] font-orbitron tracking-widest text-green-400 border border-green-500/40 rounded">
+                        USER_ID // 01
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-green-900/40 border border-green-500/50 flex items-center justify-center text-2xl text-green-300 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+                            <span class="text-xs font-vt323 text-green-500/80">STATE: ACTIVE</span>
+                        </div>
+                        <h2 class="font-orbitron text-2xl font-bold text-green-300 mb-1 glow-text-sm group-hover:text-green-200">
+                            JOHN
+                        </h2>
+                        <p class="text-xs text-green-400/70 mb-4 font-mono">
+                            Lead Systems Architect
+                        </p>
+                        <p class="text-xs text-green-300/80 leading-relaxed">
+                            Full telemetry privileges verified. Terminal interface ready for directive input.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-green-500/20 flex justify-between items-center text-[11px] font-mono text-green-500">
+                        <span>ACCESS LEVEL: 09</span>
+                        <button onclick="pingUser('John')" class="hover:text-green-200 transition-colors">
+                            <i class="fa-solid fa-bolt mr-1"></i>PING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SKY CARD -->
+                <div class="animate-float-2 group relative bg-green-950/20 backdrop-blur-md rounded-xl p-6 glow-box glow-box-hover transition-all duration-300 text-left flex flex-col justify-between">
+                    <div class="absolute -top-3 left-6 px-2 bg-black text-[10px] font-orbitron tracking-widest text-green-400 border border-green-500/40 rounded">
+                        USER_ID // 02
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-green-900/40 border border-green-500/50 flex items-center justify-center text-2xl text-green-300 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-satellite-dish"></i>
+                            </div>
+                            <span class="text-xs font-vt323 text-green-500/80">STATE: ONLINE</span>
+                        </div>
+                        <h2 class="font-orbitron text-2xl font-bold text-green-300 mb-1 glow-text-sm group-hover:text-green-200">
+                            SKY
+                        </h2>
+                        <p class="text-xs text-green-400/70 mb-4 font-mono">
+                            Orbital Network Director
+                        </p>
+                        <p class="text-xs text-green-300/80 leading-relaxed">
+                            Atmospheric relay operational. Synchronizing signal arrays with high-bandwidth node.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-green-500/20 flex justify-between items-center text-[11px] font-mono text-green-500">
+                        <span>ACCESS LEVEL: 09</span>
+                        <button onclick="pingUser('Sky')" class="hover:text-green-200 transition-colors">
+                            <i class="fa-solid fa-bolt mr-1"></i>PING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LILY CARD -->
+                <div class="animate-float-3 group relative bg-green-950/20 backdrop-blur-md rounded-xl p-6 glow-box glow-box-hover transition-all duration-300 text-left flex flex-col justify-between">
+                    <div class="absolute -top-3 left-6 px-2 bg-black text-[10px] font-orbitron tracking-widest text-green-400 border border-green-500/40 rounded">
+                        USER_ID // 03
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-green-900/40 border border-green-500/50 flex items-center justify-center text-2xl text-green-300 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <span class="text-xs font-vt323 text-green-500/80">STATE: SYNCED</span>
+                        </div>
+                        <h2 class="font-orbitron text-2xl font-bold text-green-300 mb-1 glow-text-sm group-hover:text-green-200">
+                            LILY
+                        </h2>
+                        <p class="text-xs text-green-400/70 mb-4 font-mono">
+                            Quantum Logic Specialist
+                        </p>
+                        <p class="text-xs text-green-300/80 leading-relaxed">
+                            Neural algorithms calibrated. Sub-routine execution optimized for instant response.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-green-500/20 flex justify-between items-center text-[11px] font-mono text-green-500">
+                        <span>ACCESS LEVEL: 09</span>
+                        <button onclick="pingUser('Lily')" class="hover:text-green-200 transition-colors">
+                            <i class="fa-solid fa-bolt mr-1"></i>PING
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Console Terminal Widget -->
+            <div class="mt-12 w-full max-w-2xl bg-black/80 rounded-lg p-4 text-left glow-box border border-green-500/30">
+                <div class="flex items-center justify-between pb-2 mb-3 border-b border-green-500/20 text-xs text-green-500 font-mono">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span>INTERACTIVE_LOG.sh</span>
+                    </div>
+                    <span id="logCounter">3 MESSAGES</span>
+                </div>
+                <div id="terminalConsole" class="font-mono text-xs sm:text-sm space-y-2 h-28 overflow-y-auto pr-2 text-green-400">
+                    <p class="opacity-80"><span class="text-green-600">[SYS]</span> Initializing phosphor display render sequence...</p>
+                    <p class="opacity-80"><span class="text-green-600">[AUTH]</span> Welcome handshake sent to John, Sky, and Lily.</p>
+                    <p class="text-green-300"><span class="text-green-500">[INFO]</span> All 3 target entities acknowledged high-priority signal.</p>
+                </div>
+                <!-- Input Line -->
+                <div class="mt-3 pt-2 border-t border-green-500/20 flex items-center gap-2 font-mono text-xs sm:text-sm">
+                    <span class="text-green-400">&gt;</span>
+                    <input id="commandInput" type="text" placeholder="Type 'hello', 'clear', or a message..." class="bg-transparent border-none outline-none flex-grow text-green-300 placeholder-green-700 focus:ring-0">
+                    <button onclick="executeCommand()" class="px-3 py-1 bg-green-900/50 hover:bg-green-700/50 border border-green-500/50 text-green-300 text-xs rounded transition-colors">
+                        SEND
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-green-500/30 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-green-500/70">
+            <div>
+                <span>CRT PHOSPHOR DISPLAY // MATRIX 1984-2026</span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleFlicker()" class="hover:text-green-300 transition-colors">
+                    <i class="fa-solid fa-display mr-1"></i><span id="flickerBtnText">FLICKER: ON</span>
+                </button>
+                <span>|</span>
+                <button onclick="pulsePhosphor()" class="hover:text-green-300 transition-colors">
+                    <i class="fa-solid fa-lightbulb mr-1"></i>PULSE BEAM
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // System Clock Update
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getUTCHours()).padStart(2, '0');
+            const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('systemClock').innerText = `${hours}:${minutes}:${seconds} UTC`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Terminal Interactive Console Logic
+        const consoleEl = document.getElementById('terminalConsole');
+        const inputEl = document.getElementById('commandInput');
+
+        function appendLog(tag, message, colorClass = "text-green-300") {
+            const p = document.createElement('p');
+            p.className = colorClass;
+            p.innerHTML = `<span class="text-green-600">[${tag}]</span> ${message}`;
+            consoleEl.appendChild(p);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function pingUser(name) {
+            appendLog('PING', `Direct energy pulse sent to ${name}. Matrix acknowledged.`, 'text-green-200 glow-text-sm');
+        }
+
+        function executeCommand() {
+            const val = inputEl.value.trim();
+            if (!val) return;
+
+            appendLog('USER', val, 'text-green-400');
+            inputEl.value = '';
+
+            const lower = val.toLowerCase();
+            setTimeout(() => {
+                if (lower === 'clear') {
+                    consoleEl.innerHTML = '';
+                    appendLog('SYS', 'Console log cleared.');
+                } else if (lower.includes('hello') || lower.includes('hi')) {
+                    appendLog('RESPONSE', 'Phosphor Terminal says HELLO to John, Sky, Lily, and YOU!', 'text-green-200 font-bold glow-text-sm');
+                } else if (lower === 'john' || lower === 'sky' || lower === 'lily') {
+                    appendLog('USER_FOUND', `Target ${val.toUpperCase()} is active and authorized.`, 'text-green-300');
+                } else {
+                    appendLog('SYS_CMD', `Command '${val}' executed successfully in sandbox mode.`, 'text-green-500');
+                }
+            }, 300);
+        }
+
+        // Enter key listener for terminal
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand();
+            }
+        });
+
+        // CRT Flicker Toggle
+        let flickerActive = true;
+        function toggleFlicker() {
+            flickerActive = !flickerActive;
+            const container = document.querySelector('.crt-flicker');
+            const btnText = document.getElementById('flickerBtnText');
+            if (flickerActive) {
+                container.classList.add('crt-flicker');
+                btnText.innerText = 'FLICKER: ON';
+            } else {
+                container.classList.remove('crt-flicker');
+                btnText.innerText = 'FLICKER: OFF';
+            }
+        }
+
+        // Pulse Beam FX
+        function pulsePhosphor() {
+            const canvas = document.getElementById('phosphorCanvas');
+            canvas.style.transition = 'opacity 0.2s ease';
+            canvas.style.opacity = '0.9';
+            setTimeout(() => {
+                canvas.style.opacity = '0.4';
+            }, 400);
+            appendLog('EFFECT', 'Phosphor beam beam voltage spiked for 400ms.', 'text-green-400');
+        }
+
+        // Canvas Phosphor Particle Matrix Simulation
+        const canvas = document.getElementById('phosphorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class PhosphorParticle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.8;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.alpha = Math.random() * 0.7 + 0.2;
+                this.decay = Math.random() * 0.005 + 0.002;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+
+                if (this.alpha <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(57, 255, 20, ${this.alpha})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#39ff14';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Create particles pool
+        for (let i = 0; i < 70; i++) {
+            particles.push(new PhosphorParticle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.onload = function() {
+            animateCanvas();
+        };
+    </script>
+</body>
+</html>
